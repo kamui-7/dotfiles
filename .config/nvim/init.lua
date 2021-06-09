@@ -8,7 +8,7 @@ end
 require('packer').startup(function()
     use 'wbthomason/packer.nvim'
     use 'airblade/vim-gitgutter'
-    use 'arcticicestudio/nord-vim'
+    use 'shaunsingh/nord.nvim'
     use 'chrisbra/Colorizer'
     use 'itchyny/lightline.vim'
     use 'jiangmiao/auto-pairs'
@@ -19,11 +19,13 @@ require('packer').startup(function()
     use 'tpope/vim-commentary'
     use 'tpope/vim-fugitive'
     use 'tpope/vim-surround'
-    use 'mcchrish/nnn.vim'
     use 'vim-jp/vimdoc-ja'
     use 'mechatroner/rainbow_csv'
     use 'neovim/nvim-lspconfig'
     use 'hrsh7th/nvim-compe'
+    use 'glepnir/lspsaga.nvim'
+    use 'tpope/vim-vinegar'
+    -- use 'mcchrish/nnn.vim'
     -- use "rafamadriz/friendly-snippets"
 
     use {
@@ -42,15 +44,20 @@ require('packer').startup(function()
         'nvim-telescope/telescope.nvim',
         requires = {{'nvim-lua/popup.nvim'}, {'nvim-lua/plenary.nvim'}}
     }
+    use {
+        'prettier/vim-prettier',
+        run = 'yarn install',
+    }
+
     -- use {
     --     'hrsh7th/vim-vsnip',
 	-- requires = {'hrsh7th/vim-vsnip-integ'}
     -- }
 end)
 
+
 -- Colors
 vim.o.termguicolors = true
-vim.cmd('colorscheme nord')
 vim.g.lightline = {
     colorscheme = 'nord'
 }
@@ -69,7 +76,7 @@ vim.o.smartcase = true -- If first letter is uppercase, then make the search Cas
 
 vim.o.undofile = true -- Persistant backup file
 vim.o.undolevels = 1000 -- Use a large number of undo levels
-vim.o.undodir = '~/.config/nvim/undodir' 
+vim.o.undodir = '/home/kamui/.config/nvim/undodir' 
 
 vim.o.foldenable = false -- Disable folding
 vim.o.foldmethod = 'manual' -- Fold by indent
@@ -89,8 +96,17 @@ vim.o.history = 1000 -- Bigger history size
 vim.o.title = true -- Change title
 vim.o.lazyredraw = true -- Don't redraw when executing macros
 vim.o.showmode = false -- Since lightline already displays it
-vim.o.completeopt = "menuone,noselect"
-vim.o.updatetime=200 -- Inactive time for CursorHold
+vim.o.completeopt = 'menuone,noselect'
+vim.o.updatetime = 200 -- Inactive time for CursorHold
+vim.o.shortmess = vim.o.shortmess .. 'c'
+
+vim.g['prettier#autoformat'] = true;
+vim.g['prettier#autoformat_require_pragma'] = false;
+vim.g['prettier#exec_cmd_async'] = false;
+vim.g['prettier#quickfix_enabled'] = false;
+vim.g['prettier#quickfix_auto_focus'] = false;
+
+vim.g['user_emmet_leader_key'] = '<C-X>'
 
 vim.g.mapleader = ' '
 
@@ -155,7 +171,7 @@ vim.api.nvim_set_keymap('n', '<Leader>z', ':Goyo<CR>', { noremap = true, silent 
 -- Strip whitespace of file
 vim.api.nvim_set_keymap('n', '<Leader>ss', ':call StripWhitespace()<CR>', { noremap = true })
 -- cd to the current file's folder
-vim.api.nvim_set_keymap('n', '<Leader>c', ':cd %:p:h<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<Leader>cd', ':cd %:p:h<CR>', { noremap = true })
 
 -- Move through command line history
 vim.api.nvim_set_keymap('c', '<C-N>', '<Down>', { noremap = true })
@@ -171,10 +187,18 @@ vim.api.nvim_set_keymap('n', '<F5>', ':AsyncTask liveserver<CR>', { noremap = tr
 vim.api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-K>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'K', ':Lspsaga hover_doc<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>rn', ':Lspsaga rename<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>ca', ':Lspsaga code_action<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>cc', ':Lspsaga show_line_diagnostics<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>[d', ':Lspsaga diagnostic_jump_next<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>]d', ':Lspsaga diagnostic_jump_prev<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>pd', ':Lspsaga preview_definition<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-F>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-B>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(-1)<CR>', { noremap = true, silent = true })
+
+vim.api.nvim_set_keymap('n', '[q', ':cprevious<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', ']q', ':cnext<CR>', { noremap = true, silent = true })
 
 -- Telescope
 vim.api.nvim_set_keymap('n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>', { noremap = true })
@@ -188,8 +212,7 @@ vim.g.sql_type_default = 'postgres' -- Change sql dialect to postgres
 vim.g.goyo_width = 100 -- Increase zen mode width
 vim.g.asyncrun_open = 6 -- Activate async task manager
 vim.g.asynctasks_extra_config = { '~/.config/nvim/.tasks' } -- Global tasks
-vim.g['nnn#layout'] = { window = { width = 0.9, height = 0.6, highlight = 'Debug' } }
-vim.g['nnn#replace_netrw'] = 1
+-- vim.g['nnn#layout'] = { window = { width = 0.9, height = 0.6, highlight = 'Debug' } }
 
 -- User commands
 vim.api.nvim_exec([[
@@ -213,12 +236,17 @@ augroup mygroup
     autocmd BufNewFile,BufRead .tasks set syntax=dosini
     " Format on save
     autocmd BufWritePost *.rs :Format
+    autocmd filetype netrw call NetrwMapping()
 augroup end
+
+function! NetrwMapping()
+    noremap <buffer> <C-L> <C-K><C-L>
+endfunction
 ]], false)
 
 -- Plugin configuration
 require'nvim-treesitter.configs'.setup {
-   ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml"}, 
+   ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml" }, 
    link,
    highlight = {
      enable = true,
@@ -301,3 +329,19 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
 require'lspconfig'.rust_analyzer.setup {
   capabilities = capabilities,
 }
+
+require'lspconfig'.tsserver.setup{}
+
+
+require'lspsaga'.init_lsp_saga {
+    code_action_prompt = {
+        sign = false,
+    }
+}
+
+require'lspconfig'.pyright.setup{}
+
+vim.g.nord_contrast = false
+vim.g.nord_borders = true
+vim.g.nord_disable_background = false
+require('nord').set()

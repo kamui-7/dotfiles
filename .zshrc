@@ -42,6 +42,27 @@ unins() {
     doas emerge --depclean -v
 }
 
+backup() {
+	doas borg create --compression lz4 \
+		--verbose \
+		--stats \
+		--progress \
+		--exclude-caches \
+		--exclude '/dev/*' \
+		--exclude '/proc/*' \
+		--exclude '/sys/*' \
+		--exclude '/tmp/*' \
+		--exclude '/run/*' \
+		--exclude '/mnt/*' \
+		--exclude '/media/*' \
+		--exclude '/lost+found/*' \
+		--exclude '/export/*' \
+		--exclude '/home/kamui/.cache/*' \
+		--exclude '/home/kamui/.local/share/Trash' \
+		/mnt/Storage/Backups/::$(date +"%b-%d" | awk '{print tolower($0)}') \
+		/
+}
+
 # aliases
 alias back='cd "$OLDPWD"'
 alias bc='bc -lq'
@@ -53,7 +74,7 @@ alias df='df -H'
 alias du='du -ch'
 alias h='history'
 alias ka="killall"
-alias ls="exa --color=always --icons"
+alias ls="exa --color=always --icons -s type"
 alias l="ls -l"
 alias la="ls -la"
 alias sl="ls"
@@ -72,6 +93,7 @@ alias hekr="cat /dev/urandom | base64 -w 0"
 alias tn="tmux new"
 alias ta="tmux attach"
 alias packages="cat /var/lib/portage/world | sed 's/.*\///g' | sort | less"
+alias tree="ls --tree"
 
 alias g='git'
 alias gc="git clone"

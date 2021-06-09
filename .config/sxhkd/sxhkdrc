@@ -6,6 +6,9 @@ super + Return
 super + d
         element-desktop
 
+super + shift + d
+        discord
+
 # program launcher
 super + @space
 	rofi -show drun -show-icons -font "Iosevka 13"
