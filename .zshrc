@@ -37,6 +37,12 @@ temp() {
         | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'
 }
 
+update() {
+    doas emerge --sync
+    doas emerge -auvDN @world --autounmask=y --autounmask-continue
+    doas emerge --depclean -v
+}
+
 unins() {
     doas emerge --deselect ${@}
     doas emerge --depclean -v
@@ -88,7 +94,6 @@ alias tp="trash"
 alias weather="curl wttr.in"
 alias n="nnn"
 alias e="doas emerge"
-alias update="e --sync && e -auvDN @world --autounmask=y --autounmask-continue"
 alias hekr="cat /dev/urandom | base64 -w 0"
 alias tn="tmux new"
 alias ta="tmux attach"
@@ -96,13 +101,13 @@ alias packages="cat /var/lib/portage/world | sed 's/.*\///g' | sort | less"
 alias tree="ls --tree"
 
 alias g='git'
-alias gc="git clone"
-alias ga='git add'
-alias gb='git branch'
-alias gcm='git commit -m'
-alias gl='git log'
-alias gpo='git push origin'
-alias gs='git status'
+alias gc="g clone"
+alias ga='g add'
+alias gb='g branch'
+alias gcm='g commit -m'
+alias gl='g log'
+alias gpo='g push origin'
+alias gs='g status'
 
 alias c="cargo"
 alias cr="c run"

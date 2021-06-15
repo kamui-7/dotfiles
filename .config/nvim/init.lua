@@ -7,16 +7,12 @@ end
 
 require('packer').startup(function()
     use 'wbthomason/packer.nvim'
-    use 'airblade/vim-gitgutter'
-    use 'shaunsingh/nord.nvim'
-    use 'chrisbra/Colorizer'
+    use 'windwp/nvim-autopairs'
+    use 'arcticicestudio/nord-vim'
     use 'itchyny/lightline.vim'
-    use 'jiangmiao/auto-pairs'
-    use 'junegunn/goyo.vim'
     use 'junegunn/gv.vim'
     use 'mattn/emmet-vim'
     use 'plasticboy/vim-markdown'
-    use 'tpope/vim-commentary'
     use 'tpope/vim-fugitive'
     use 'tpope/vim-surround'
     use 'vim-jp/vimdoc-ja'
@@ -25,9 +21,22 @@ require('packer').startup(function()
     use 'hrsh7th/nvim-compe'
     use 'glepnir/lspsaga.nvim'
     use 'tpope/vim-vinegar'
-    -- use 'mcchrish/nnn.vim'
-    -- use "rafamadriz/friendly-snippets"
-
+    use "onsails/lspkind-nvim"
+    use "sbdchd/neoformat"
+    use "kyazdani42/nvim-web-devicons"
+    use "terrortylor/nvim-comment"
+    use "rafamadriz/friendly-snippets"
+    use "nvim-telescope/telescope-media-files.nvim"
+    use "norcalli/nvim-colorizer.lua"
+    use "windwp/nvim-ts-autotag"
+    use {
+        "folke/trouble.nvim",
+        requires = "kyazdani42/nvim-web-devicons",
+        config = function()
+            require("trouble").setup {
+            }
+        end
+    }
     use {
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate'
@@ -45,19 +54,21 @@ require('packer').startup(function()
         requires = {{'nvim-lua/popup.nvim'}, {'nvim-lua/plenary.nvim'}}
     }
     use {
-        'prettier/vim-prettier',
-        run = 'yarn install',
+        'hrsh7th/vim-vsnip',
+	requires = {'hrsh7th/vim-vsnip-integ'}
     }
-
-    -- use {
-    --     'hrsh7th/vim-vsnip',
-	-- requires = {'hrsh7th/vim-vsnip-integ'}
-    -- }
+    use {
+        'lewis6991/gitsigns.nvim',
+        requires = {
+            'nvim-lua/plenary.nvim'
+        },
+    }
 end)
 
 
 -- Colors
 vim.o.termguicolors = true
+vim.cmd("colorscheme nord")
 vim.g.lightline = {
     colorscheme = 'nord'
 }
@@ -78,8 +89,9 @@ vim.o.undofile = true -- Persistant backup file
 vim.o.undolevels = 1000 -- Use a large number of undo levels
 vim.o.undodir = '/home/kamui/.config/nvim/undodir' 
 
-vim.o.foldenable = false -- Disable folding
-vim.o.foldmethod = 'manual' -- Fold by indent
+-- vim.o.foldenable = false -- Disable folding
+vim.o.foldmethod = "expr"
+vim.o.foldexpr = "nvim_treesitter#foldexpr()"
 vim.o.foldlevel = 1 -- Only fold one level deep
 vim.o.foldclose = 'all' -- Close all fold
 
@@ -100,15 +112,11 @@ vim.o.completeopt = 'menuone,noselect'
 vim.o.updatetime = 200 -- Inactive time for CursorHold
 vim.o.shortmess = vim.o.shortmess .. 'c'
 
-vim.g['prettier#autoformat'] = true;
-vim.g['prettier#autoformat_require_pragma'] = false;
-vim.g['prettier#exec_cmd_async'] = false;
-vim.g['prettier#quickfix_enabled'] = false;
-vim.g['prettier#quickfix_auto_focus'] = false;
-
-vim.g['user_emmet_leader_key'] = '<C-X>'
+vim.g['user_emmet_leader_key'] = '<C-]>'
 
 vim.g.mapleader = ' '
+
+vim.api.nvim_set_keymap("i", "<C-C>", "<Esc>", {silent = true})
 
 -- Edit vimrc
 vim.api.nvim_set_keymap('n', '<Leader>ev', ':new ~/.config/nvim/init.lua<CR>', { noremap = true, silent = true })
@@ -164,10 +172,8 @@ vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
 
 -- Much easier way to get to normal mode
-vim.api.nvim_set_keymap('n', '<C-C>', '<Esc>', { noremap = true })
+-- vim.api.nvim_set_keymap('n', '<C-C>', '<Esc>', { noremap = true })
 
--- Zen mode
-vim.api.nvim_set_keymap('n', '<Leader>z', ':Goyo<CR>', { noremap = true, silent = true })
 -- Strip whitespace of file
 vim.api.nvim_set_keymap('n', '<Leader>ss', ':call StripWhitespace()<CR>', { noremap = true })
 -- cd to the current file's folder
@@ -209,7 +215,6 @@ vim.api.nvim_set_keymap('n', '<Leader>fh', '<cmd>lua require("telescope.builtin"
 -- Plugin-specific settings
 vim.g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is for escape
 vim.g.sql_type_default = 'postgres' -- Change sql dialect to postgres
-vim.g.goyo_width = 100 -- Increase zen mode width
 vim.g.asyncrun_open = 6 -- Activate async task manager
 vim.g.asynctasks_extra_config = { '~/.config/nvim/.tasks' } -- Global tasks
 -- vim.g['nnn#layout'] = { window = { width = 0.9, height = 0.6, highlight = 'Debug' } }
@@ -229,9 +234,6 @@ command! Format execute 'lua vim.lsp.buf.formatting()'
 vim.api.nvim_exec([[
 augroup mygroup
     autocmd!
-    " Fixes airline bug when window goes out of focus
-    autocmd! User GoyoEnter nested set eventignore=FocusGained
-    autocmd! User GoyoLeave nested set eventignore=
     " Filetype corrections
     autocmd BufNewFile,BufRead .tasks set syntax=dosini
     " Format on save
@@ -246,7 +248,7 @@ endfunction
 
 -- Plugin configuration
 require'nvim-treesitter.configs'.setup {
-   ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml" }, 
+   ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml", "tsx" }, 
    link,
    highlight = {
      enable = true,
@@ -258,7 +260,7 @@ require'compe'.setup {
   enabled = true; autocomplete = true;
   debug = false;
   min_length = 1;
-  preselect = 'enable';
+  preselect = 'always';
   throttle_time = 80;
   source_timeout = 200;
   incomplete_delay = 400;
@@ -270,7 +272,7 @@ require'compe'.setup {
   source = {
     path = true;
     nvim_lsp = true;
-    -- vsnip = true;
+    vsnip = true;
   };
 }
 
@@ -287,14 +289,11 @@ local check_back_space = function()
     end
 end
 
--- Use (s-)tab to:
---- move to prev/next item in completion menuone
---- jump to prev/next snippet's placeholder
 _G.tab_complete = function()
   if vim.fn.pumvisible() == 1 then
     return t "<C-n>"
-  -- elseif vim.fn.call("vsnip#available", {1}) == 1 then
-  --   return t "<Plug>(vsnip-expand-or-jump)"
+  elseif vim.fn.call("vsnip#available", {1}) == 1 then
+    return t "<Plug>(vsnip-expand-or-jump)"
   elseif check_back_space() then
     return t "<Tab>"
   else
@@ -304,8 +303,8 @@ end
 _G.s_tab_complete = function()
   if vim.fn.pumvisible() == 1 then
     return t "<C-p>"
-  -- elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
-  --   return t "<Plug>(vsnip-jump-prev)"
+  elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
+    return t "<Plug>(vsnip-jump-prev)"
   else
     return t "<S-Tab>"
   end
@@ -327,21 +326,53 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
 }
 
 require'lspconfig'.rust_analyzer.setup {
-  capabilities = capabilities,
+    capabilities = capabilities,
+    settings = {                      
+        ["rust-analyzer"] = {
+            diagnostics = {
+                enable = true,
+                disabled = {"unresolved-proc-macro"},
+                enableExperimental = true,
+            },
+        }
+    }
 }
 
 require'lspconfig'.tsserver.setup{}
 
 
 require'lspsaga'.init_lsp_saga {
+    use_saga_diagnostic_sign = true,
+    error_sign = '',
+    warn_sign = '',
+    infor_sign = '',
     code_action_prompt = {
         sign = false,
     }
 }
 
 require'lspconfig'.pyright.setup{}
+require("lspkind").init()
 
-vim.g.nord_contrast = false
-vim.g.nord_borders = true
-vim.g.nord_disable_background = false
-require('nord').set()
+require'nvim-web-devicons'.setup {
+    default = true;
+}
+
+require('nvim_comment').setup()
+require('telescope').load_extension('media_files')
+require('colorizer').setup()
+require('nvim-autopairs').setup()
+
+function _G.completions()
+    local npairs = require("nvim-autopairs")
+    if vim.fn.pumvisible() == 1 then
+        if vim.fn.complete_info()["selected"] ~= -1 then
+            return vim.fn["compe#confirm"]("<CR>")
+        end
+    end
+    return npairs.check_break_line_char()
+end
+
+vim.api.nvim_set_keymap("i", "<CR>", "v:lua.completions()", {expr = true})
+require('gitsigns').setup {}
+require('nvim-ts-autotag').setup()
