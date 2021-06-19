@@ -1,4 +1,4 @@
-export PATH=$HOME/.scripts:$HOME/.local/bin:~/.cargo/bin$PATH
+export PATH=$HOME/.scripts:$HOME/.local/bin:~/programs/bin:$PATH
 export VISUAL="nvim"
 export PAGER="less"
 export EDITOR="nvim"

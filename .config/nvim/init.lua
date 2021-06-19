@@ -89,12 +89,6 @@ vim.o.undofile = true -- Persistant backup file
 vim.o.undolevels = 1000 -- Use a large number of undo levels
 vim.o.undodir = '/home/kamui/.config/nvim/undodir' 
 
--- vim.o.foldenable = false -- Disable folding
-vim.o.foldmethod = "expr"
-vim.o.foldexpr = "nvim_treesitter#foldexpr()"
-vim.o.foldlevel = 1 -- Only fold one level deep
-vim.o.foldclose = 'all' -- Close all fold
-
 -- Misc
 vim.o.helplang = 'ja,en' --Japanese help docs
 vim.o.hidden = true -- Hide buffers instead of closing them
@@ -103,7 +97,7 @@ vim.o.scrolloff = 8 -- So the cursor isn't all the way at the bottom
 vim.o.splitbelow = true -- Split directions
 vim.o.splitright = true 
 vim.o.guicursor = 'i:block' -- Get rid of the ugly line cursor in insert mode
-vim.o.wrap = true -- Wrap lines
+vim.o.wrap = false -- Wrap lines
 vim.o.history = 1000 -- Bigger history size
 vim.o.title = true -- Change title
 vim.o.lazyredraw = true -- Don't redraw when executing macros
@@ -112,11 +106,11 @@ vim.o.completeopt = 'menuone,noselect'
 vim.o.updatetime = 200 -- Inactive time for CursorHold
 vim.o.shortmess = vim.o.shortmess .. 'c'
 
-vim.g['user_emmet_leader_key'] = '<C-]>'
-
+-- Leader key
 vim.g.mapleader = ' '
 
-vim.api.nvim_set_keymap("i", "<C-C>", "<Esc>", {silent = true})
+-- Alternate Esc bind
+vim.api.nvim_set_keymap("i", "<C-C>", "<Esc>", { silent = true })
 
 -- Edit vimrc
 vim.api.nvim_set_keymap('n', '<Leader>ev', ':new ~/.config/nvim/init.lua<CR>', { noremap = true, silent = true })
@@ -171,9 +165,6 @@ vim.api.nvim_set_keymap('n', '<Leader>;', ';', { noremap = true })
 vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
 
--- Much easier way to get to normal mode
--- vim.api.nvim_set_keymap('n', '<C-C>', '<Esc>', { noremap = true })
-
 -- Strip whitespace of file
 vim.api.nvim_set_keymap('n', '<Leader>ss', ':call StripWhitespace()<CR>', { noremap = true })
 -- cd to the current file's folder
@@ -187,9 +178,11 @@ vim.api.nvim_set_keymap('c', '<C-P>', '<Up>', { noremap = true })
 vim.api.nvim_set_keymap('n', '[e', ':<c-u>execute "move -1-". v:count1<cr>', { noremap = true })
 vim.api.nvim_set_keymap('n', ']e', ':<c-u>execute "move +". v:count1<cr>', { noremap = true })
 
+-- Tasks
 vim.api.nvim_set_keymap('n', '<F4>', ':MarkdownPreview<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<F5>', ':AsyncTask liveserver<CR>', { noremap = true, silent = true })
 
+-- LSP mappings
 vim.api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { noremap = true, silent = true })
@@ -203,11 +196,12 @@ vim.api.nvim_set_keymap('n', '<Leader>pd', ':Lspsaga preview_definition<CR>', { 
 vim.api.nvim_set_keymap('n', '<C-F>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-B>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(-1)<CR>', { noremap = true, silent = true })
 
+-- Quickfix mappings
 vim.api.nvim_set_keymap('n', '[q', ':cprevious<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', ']q', ':cnext<CR>', { noremap = true, silent = true })
 
--- Telescope
-vim.api.nvim_set_keymap('n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>', { noremap = true })
+-- Telescope mappings
+vim.api.nvim_set_keymap('n', '<C-P>', '<cmd>lua require("telescope.builtin").git_files()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>', { noremap = true })
@@ -217,7 +211,7 @@ vim.g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is 
 vim.g.sql_type_default = 'postgres' -- Change sql dialect to postgres
 vim.g.asyncrun_open = 6 -- Activate async task manager
 vim.g.asynctasks_extra_config = { '~/.config/nvim/.tasks' } -- Global tasks
--- vim.g['nnn#layout'] = { window = { width = 0.9, height = 0.6, highlight = 'Debug' } }
+vim.g['user_emmet_leader_key'] = '<C-]>'
 
 -- User commands
 vim.api.nvim_exec([[
@@ -238,12 +232,7 @@ augroup mygroup
     autocmd BufNewFile,BufRead .tasks set syntax=dosini
     " Format on save
     autocmd BufWritePost *.rs :Format
-    autocmd filetype netrw call NetrwMapping()
 augroup end
-
-function! NetrwMapping()
-    noremap <buffer> <C-L> <C-K><C-L>
-endfunction
 ]], false)
 
 -- Plugin configuration
@@ -255,7 +244,7 @@ require'nvim-treesitter.configs'.setup {
    },
 }
 
--- Autocomplete
+-- compe.nvim setup
 require'compe'.setup {
   enabled = true; autocomplete = true;
   debug = false;
@@ -325,6 +314,7 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
   }
 }
 
+-- LSP servers
 require'lspconfig'.rust_analyzer.setup {
     capabilities = capabilities,
     settings = {                      
@@ -333,14 +323,26 @@ require'lspconfig'.rust_analyzer.setup {
                 enable = true,
                 disabled = {"unresolved-proc-macro"},
                 enableExperimental = true,
-            },
+           },
         }
     }
 }
 
 require'lspconfig'.tsserver.setup{}
+require'lspconfig'.pyright.setup{}
+require'lspconfig'.ccls.setup {
+  init_options = {
+    compilationDatabaseDirectory = "build";
+    clang = {
+      excludeArgs = { "-frounding-math"} ;
+    };
+    cache = {
+        directory = "/tmp/.ccls-cache"
+    }
+  }
+}
 
-
+-- LSP Misc
 require'lspsaga'.init_lsp_saga {
     use_saga_diagnostic_sign = true,
     error_sign = '',
@@ -350,19 +352,9 @@ require'lspsaga'.init_lsp_saga {
         sign = false,
     }
 }
-
-require'lspconfig'.pyright.setup{}
 require("lspkind").init()
 
-require'nvim-web-devicons'.setup {
-    default = true;
-}
-
-require('nvim_comment').setup()
-require('telescope').load_extension('media_files')
-require('colorizer').setup()
 require('nvim-autopairs').setup()
-
 function _G.completions()
     local npairs = require("nvim-autopairs")
     if vim.fn.pumvisible() == 1 then
@@ -372,7 +364,13 @@ function _G.completions()
     end
     return npairs.check_break_line_char()
 end
-
 vim.api.nvim_set_keymap("i", "<CR>", "v:lua.completions()", {expr = true})
-require('gitsigns').setup {}
+
+require'nvim-web-devicons'.setup {
+    default = true;
+}
+require('nvim_comment').setup()
+require('telescope').load_extension('media_files')
+require('colorizer').setup()
+require('gitsigns').setup()
 require('nvim-ts-autotag').setup()

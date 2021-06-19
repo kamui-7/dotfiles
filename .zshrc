@@ -60,7 +60,7 @@ backup() {
 		--exclude '/tmp/*' \
 		--exclude '/run/*' \
 		--exclude '/mnt/*' \
-		--exclude '/media/*' \
+		--exclude '/media/Backups/*' \
 		--exclude '/lost+found/*' \
 		--exclude '/export/*' \
 		--exclude '/home/kamui/.cache/*' \
@@ -162,4 +162,5 @@ autoload -Uz edit-command-line
 bindkey -M vicmd 'v' edit-command-line
 bindkey -M viins '^C' vi-cmd-mode
 
+source ~/.zshenv
 test -r "~/.dir_colors" && eval $(dircolors ~/.dir_colors)
