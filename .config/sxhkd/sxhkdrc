@@ -2,9 +2,14 @@
 super + Return
 	alacritty	
 
-# communication
 super + d
-        element-desktop
+        discord
+
+alt + shift + space
+        ~/dev/projects/discord-emote-menu/emote.sh
+
+super + shift + d
+        ~/programs/schildichat.AppImage
 
 # program launcher
 super + @space

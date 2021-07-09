@@ -1,8 +1,8 @@
 local install_path = vim.fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
 
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-  vim.fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
-  vim.api.nvim_command('packadd packer.nvim')
+    vim.fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
+    vim.api.nvim_command('packadd packer.nvim')
 end
 
 require('packer').startup(function()
@@ -20,7 +20,6 @@ require('packer').startup(function()
     use 'neovim/nvim-lspconfig'
     use 'hrsh7th/nvim-compe'
     use 'glepnir/lspsaga.nvim'
-    use 'tpope/vim-vinegar'
     use "onsails/lspkind-nvim"
     use "sbdchd/neoformat"
     use "kyazdani42/nvim-web-devicons"
@@ -29,6 +28,7 @@ require('packer').startup(function()
     use "nvim-telescope/telescope-media-files.nvim"
     use "norcalli/nvim-colorizer.lua"
     use "windwp/nvim-ts-autotag"
+    use "mcchrish/nnn.vim"
     use {
         "folke/trouble.nvim",
         requires = "kyazdani42/nvim-web-devicons",
@@ -55,13 +55,19 @@ require('packer').startup(function()
     }
     use {
         'hrsh7th/vim-vsnip',
-	requires = {'hrsh7th/vim-vsnip-integ'}
+        requires = {'hrsh7th/vim-vsnip-integ'}
     }
     use {
         'lewis6991/gitsigns.nvim',
         requires = {
             'nvim-lua/plenary.nvim'
         },
+    }
+    use {
+        'kyazdani42/nvim-tree.lua',
+        requires = {
+            'kyazdani42/nvim-web-devicons'
+        }
     }
 end)
 
@@ -201,17 +207,26 @@ vim.api.nvim_set_keymap('n', '[q', ':cprevious<CR>', { noremap = true, silent = 
 vim.api.nvim_set_keymap('n', ']q', ':cnext<CR>', { noremap = true, silent = true })
 
 -- Telescope mappings
-vim.api.nvim_set_keymap('n', '<C-P>', '<cmd>lua require("telescope.builtin").git_files()<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>', { noremap = true })
+
+-- Open up nvim tree
+vim.api.nvim_set_keymap('n', '<C-N>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>rr', ':NvimTreeRefresh<CR>', { noremap = true, silent = true })
 
 -- Plugin-specific settings
 vim.g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is for escape
 vim.g.sql_type_default = 'postgres' -- Change sql dialect to postgres
 vim.g.asyncrun_open = 6 -- Activate async task manager
 vim.g.asynctasks_extra_config = { '~/.config/nvim/.tasks' } -- Global tasks
-vim.g['user_emmet_leader_key'] = '<C-]>'
+vim.g.vim_markdown_folding_disabled = 1
+vim.g.neoformat_only_msg_on_error = 1
+vim.g.nvim_tree_ignore = { '.git', 'node_modules', '.cache' }
+vim.g.nvim_tree_gitignore = 1 
+vim.g.nvim_tree_auto_open = 1
+vim.g.nvim_tree_auto_close = 1
 
 -- User commands
 vim.api.nvim_exec([[
@@ -227,46 +242,46 @@ command! Format execute 'lua vim.lsp.buf.formatting()'
 -- Autocommands
 vim.api.nvim_exec([[
 augroup mygroup
-    autocmd!
-    " Filetype corrections
-    autocmd BufNewFile,BufRead .tasks set syntax=dosini
-    " Format on save
-    autocmd BufWritePost *.rs :Format
+autocmd!
+" Filetype corrections
+autocmd BufNewFile,BufRead .tasks set syntax=dosini
+" Format on save
+autocmd BufWritePost * :Format
 augroup end
 ]], false)
 
 -- Plugin configuration
 require'nvim-treesitter.configs'.setup {
-   ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml", "tsx" }, 
-   link,
-   highlight = {
-     enable = true,
-   },
+    ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml", "tsx" }, 
+    link,
+    highlight = {
+        enable = true,
+    },
 }
 
 -- compe.nvim setup
 require'compe'.setup {
-  enabled = true; autocomplete = true;
-  debug = false;
-  min_length = 1;
-  preselect = 'always';
-  throttle_time = 80;
-  source_timeout = 200;
-  incomplete_delay = 400;
-  max_abbr_width = 100;
-  max_kind_width = 100;
-  max_menu_width = 100;
-  documentation = true;
+    enabled = true; autocomplete = true;
+    debug = false;
+    min_length = 1;
+    preselect = 'always';
+    throttle_time = 80;
+    source_timeout = 200;
+    incomplete_delay = 400;
+    max_abbr_width = 100;
+    max_kind_width = 100;
+    max_menu_width = 100;
+    documentation = true;
 
-  source = {
-    path = true;
-    nvim_lsp = true;
-    vsnip = true;
-  };
+    source = {
+        path = true;
+        nvim_lsp = true;
+        vsnip = true;
+    };
 }
 
 local t = function(str)
-  return vim.api.nvim_replace_termcodes(str, true, true, true)
+    return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
 
 local check_back_space = function()
@@ -279,24 +294,24 @@ local check_back_space = function()
 end
 
 _G.tab_complete = function()
-  if vim.fn.pumvisible() == 1 then
-    return t "<C-n>"
-  elseif vim.fn.call("vsnip#available", {1}) == 1 then
-    return t "<Plug>(vsnip-expand-or-jump)"
-  elseif check_back_space() then
-    return t "<Tab>"
-  else
-    return vim.fn['compe#complete']()
-  end
+    if vim.fn.pumvisible() == 1 then
+        return t "<C-n>"
+    elseif vim.fn.call("vsnip#available", {1}) == 1 then
+        return t "<Plug>(vsnip-expand-or-jump)"
+    elseif check_back_space() then
+        return t "<Tab>"
+    else
+        return vim.fn['compe#complete']()
+    end
 end
 _G.s_tab_complete = function()
-  if vim.fn.pumvisible() == 1 then
-    return t "<C-p>"
-  elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
-    return t "<Plug>(vsnip-jump-prev)"
-  else
-    return t "<S-Tab>"
-  end
+    if vim.fn.pumvisible() == 1 then
+        return t "<C-p>"
+    elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
+        return t "<Plug>(vsnip-jump-prev)"
+    else
+        return t "<S-Tab>"
+    end
 end
 
 vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
@@ -307,11 +322,11 @@ vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 capabilities.textDocument.completion.completionItem.resolveSupport = {
-  properties = {
-    'documentation',
-    'detail',
-    'additionalTextEdits',
-  }
+    properties = {
+        'documentation',
+        'detail',
+        'additionalTextEdits',
+    }
 }
 
 -- LSP servers
@@ -323,24 +338,69 @@ require'lspconfig'.rust_analyzer.setup {
                 enable = true,
                 disabled = {"unresolved-proc-macro"},
                 enableExperimental = true,
-           },
+            },
         }
     }
 }
 
-require'lspconfig'.tsserver.setup{}
-require'lspconfig'.pyright.setup{}
-require'lspconfig'.ccls.setup {
-  init_options = {
-    compilationDatabaseDirectory = "build";
-    clang = {
-      excludeArgs = { "-frounding-math"} ;
-    };
-    cache = {
-        directory = "/tmp/.ccls-cache"
-    }
-  }
+require'lspconfig'.tsserver.setup {}
+
+-- eslint and prettier
+local eslint = {
+    lintCommand = 'eslint_d --stdin --stdin-filename ${INPUT} -f unix',
+    lintStdin = true,
+    lintIgnoreExitCode = true
 }
+
+local prettier = {
+    formatCommand = 'prettier --find-config-path --stdin-filepath ${INPUT}',
+    formatStdin = true
+}
+
+local efm_log_dir = '/tmp/'
+local efm_root_markers = { 'package.json', '.git/' }
+local efm_config = os.getenv('HOME') .. '/.config/nvim/efm_config.yaml'
+local efm_languages = {
+    yaml = { prettier },
+    json = { prettier },
+    markdown = { prettier },
+    javascript = { eslint, prettier },
+    javascriptreact = { eslint, prettier },
+    typescript = { eslint, prettier },
+    typescriptreact = { eslint, prettier },
+    css = { prettier },
+    scss = { prettier },
+    json = { prettier },
+    graphql = { prettier },
+    html = { prettier }
+}
+
+require'lspconfig'.efm.setup({
+    cmd = {
+        "efm-langserver",
+        "-c",
+        efm_config,
+        "-logfile",
+        efm_log_dir .. "efm.log"
+    },
+    filetype = {
+        'javascript',
+        'javascriptreact',
+        'typescript',
+        'typescriptreact'
+    },
+    root_dir = require'lspconfig'.util.root_pattern(unpack(efm_root_markers)),
+    init_options = {
+        documentFormatting = false
+    },
+    settings = {
+        rootMarkers = efm_root_markers,
+        languages = efm_languages
+    }
+})
+
+require'lspconfig'.pyright.setup{}
+require'lspconfig'.clangd.setup{}
 
 -- LSP Misc
 require'lspsaga'.init_lsp_saga {
@@ -374,3 +434,6 @@ require('telescope').load_extension('media_files')
 require('colorizer').setup()
 require('gitsigns').setup()
 require('nvim-ts-autotag').setup()
+require('nnn').setup{
+    layout = { window = { width = 0.9, height = 0.6, highlight = 'Debug' } }
+}
